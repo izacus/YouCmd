@@ -1,4 +1,7 @@
+#! /usr/bin/env python2
+
 import argparse
+import os
 from fabulous.color import blue, yellow, green, fg256, magenta, bold, red
 import yaml
 from youtrack.connection import Connection
@@ -134,7 +137,8 @@ if __name__ == "__main__":
     args = parse_arguments()
 
     # Load configuration
-    configuration = yaml.load(file("config.yaml", "r"))
+    config_file = os.path.join(os.path.dirname(os.path.realpath(__file__)), "config.yaml")
+    configuration = yaml.load(file(config_file, "r"))
 
     # Establish connection
     youtrack = Connection(configuration["site"], configuration["authentication"]["username"], configuration["authentication"]["password"])
