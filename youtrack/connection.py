@@ -686,7 +686,7 @@ class Connection(object):
         response, content = self._req('POST', '/issue/' + issueId + "/execute?" +
                                               urllib.urlencode(params), body='')
 
-        return "Command executed"
+        return response, content
 
     def getCustomField(self, name):
         return youtrack.CustomField(self._get("/admin/customfield/field/" + urlquote(name.encode('utf-8'))), self)

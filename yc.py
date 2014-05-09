@@ -1,6 +1,7 @@
 #! /usr/bin/env python2
 
 import argparse
+import time
 import os
 from fabulous.color import blue, yellow, green, fg256, magenta, bold, red
 import yaml
@@ -18,6 +19,15 @@ def parse_arguments():
 
     show_subparser = command_subparser.add_parser("show", help="Shows issue details")
     show_subparser.add_argument("id")
+
+    set_state_subparser = command_subparser.add_parser("set-state", help="Sets issue state.")
+    set_state_subparser.add_argument("id", help="Issue ID")
+    set_state_subparser.add_argument("state", help="New state")
+    set_state_subparser.add_argument("comment", nargs="?", default=None)
+
+    comment_subparser = command_subparser.add_parser("comment", help="Adds comment to issue.")
+    comment_subparser.add_argument("id", help="Issue ID")
+    comment_subparser.add_argument("comment", help="Comment to add")
 
     args = parser.parse_args()
     return args
@@ -106,10 +116,27 @@ def show_issue_details(youtrack, id):
 
     print ""
     print fg256("#DDD", "--=== ") + issue["summary"] + fg256("#DDD", " ===--")
+    print "-"
     print "[ID: {id}] [{crit}]{assignee} {state} ".format(state="[" + get_state_color(state) + "]",
                                                           assignee=assignee,
                                                           crit=colorize_priority(issue["Priority"], issue["Priority"]),
                                                           id=fg256("#AAA", issue["id"]))
+
+    created_text = ""
+    updated_text = ""
+    resolved_text = ""
+    if "created" in issue:
+        created_date = time.gmtime(float(issue["created"]) / 1000)
+        created_text = "[Created: " + time.strftime('%Y-%m-%d %H:%M:%S', created_date) + "]"
+
+    if "updated" in issue:
+        updated_date = time.gmtime(float(issue["updated"]) / 1000)
+        updated_text = blue("[Updated: " + time.strftime('%Y-%m-%d %H:%M:%S', updated_date) + "]")
+
+    if "resolved" in issue:
+        resolved_date = time.gmtime(float(issue["resolved"]) / 1000)
+        resolved_text = green("[Resolved: " + time.strftime('%Y-%m-%d %H:%M:%S', resolved_date) + "]")
+    print created_text + updated_text + resolved_text
 
     print ""
     if "description" in issue:
@@ -133,6 +160,14 @@ def show_issue_details(youtrack, id):
                     print pad_string_to("", 28), fg256("#AAA", line)
 
 
+def set_issue_state(youtrack, id, state, comment=None):
+    youtrack.executeCommand(id, "state " + state, comment=comment)
+    print "[{id}] => {state}".format(id=id,state=state)
+
+def comment_issue(youtrack, id, comment):
+    youtrack.executeCommand(id, "", comment=comment)
+
+
 if __name__ == "__main__":
     args = parse_arguments()
 
@@ -147,4 +182,8 @@ if __name__ == "__main__":
         show_issues(youtrack, all=args.all)
     elif args.command == "show":
         show_issue_details(youtrack, args.id)
+    elif args.command == "set-state":
+        set_issue_state(youtrack, args.id, args.state, args.comment)
+    elif args.command == "comment":
+        comment_issue(youtrack, args.id, args.comment)
 
