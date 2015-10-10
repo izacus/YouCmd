@@ -1,0 +1,6 @@
+site: <URL to your YouTrack>
+project: <Project shorthand>
+authentication:
+    username: <username>
+    password: <password>
+
