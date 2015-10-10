@@ -3,7 +3,7 @@
 import argparse
 import time
 import os
-from fabulous.color import blue, yellow, green, fg256, magenta, bold, red
+import click
 import yaml
 from youtrack.connection import Connection
 
@@ -34,13 +34,13 @@ def parse_arguments():
 
 def colorize_priority(priority, text):
     if priority == "Show-stopper":
-        return bold(red(text))
+        return click.style(text, fg="red", bold=True)
     elif priority == "Critical":
-        return bold(red(text))
+        return click.style(text, fg="red", bold=True)
     elif priority == "Major":
-        return red(text)
+        return click.style(text, fg="red")
     elif priority == "Normal":
-        return green("N")
+        return click.style(text, fg="green")
 
     return text
 
@@ -66,11 +66,11 @@ def pad_string_to(string, length):
 
 def get_state_color(state):
     if state == "Open":
-        return blue(state)
+        return click.style(state, fg="blue")
     elif state == "In Progress":
-        return yellow(state)
+        return click.style(state, fg="yellow")
     elif state == "Fixed":
-        return green(state)
+        return click.style(state, fg="green")
     else:
         return fg256("#AAA", state)
 
@@ -85,7 +85,7 @@ def pretty_print_issues(issues, details=False):
 
         print "[{id}]{crit}{state}{summary}".format(state=pad_string_to("[" + get_state_color(state) + "]", 18),
                                                                    crit=get_priority_short_string(issue["Priority"]),
-                                                                   id=fg256("#AAA", pad_string_to(issue["id"], 8)),
+                                                                   id=click.style(pad_string_to(issue["id"], 8), fg="white"),
                                                                    summary=summary)
         if details:
             if "description" in issue:
